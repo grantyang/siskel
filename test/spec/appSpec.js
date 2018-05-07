@@ -57,6 +57,7 @@ describe('Siskel', function() {
 
     it('should trigger sort when a model changes', function() {
       model.toggleLike();
+      console.log(model);
       expect(collection.sort).to.have.been.called;
     });
 

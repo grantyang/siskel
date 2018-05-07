@@ -4,8 +4,8 @@ var Movie = Backbone.Model.extend({
     like: true
   },
 
-  toggleLike: function() {
-    // your code here
+  toggleLike: function () {
+    this.set('like', !this.get('like'));
   }
 
 });
@@ -14,14 +14,15 @@ var Movies = Backbone.Collection.extend({
 
   model: Movie,
 
-  initialize: function() {
-    // your code here
+  initialize: function () {
+    this.on('change:like', this.sort, this);
   },
 
   comparator: 'title',
 
-  sortByField: function(field) {
-    // your code here
+  sortByField: function (field) {
+    this.comparator = field;
+    this.sort();
   }
 
 });
@@ -32,12 +33,12 @@ var AppView = Backbone.View.extend({
     'click form input': 'handleClick'
   },
 
-  handleClick: function(e) {
+  handleClick: function (e) {
     var field = $(e.target).val();
     this.collection.sortByField(field);
   },
 
-  render: function() {
+  render: function () {
     new MoviesView({
       el: this.$('#movies'),
       collection: this.collection
@@ -57,19 +58,19 @@ var MovieView = Backbone.View.extend({
                           <div class="rating">Fan rating: <%- rating %> of 10</div> \
                         </div>'),
 
-  initialize: function() {
-    // your code here
+  initialize: function () {
+    this.model.on('change', this.render, this);
   },
 
   events: {
     'click button': 'handleClick'
   },
 
-  handleClick: function() {
-    // your code here
+  handleClick: function () {
+    this.model.toggleLike();
   },
 
-  render: function() {
+  render: function () {
     this.$el.html(this.template(this.model.attributes));
     return this.$el;
   }
@@ -78,17 +79,17 @@ var MovieView = Backbone.View.extend({
 
 var MoviesView = Backbone.View.extend({
 
-  initialize: function() {
-    // your code here
+  initialize: function () {
+    this.collection.on('sort', this.render, this);
   },
 
-  render: function() {
+  render: function () {
     this.$el.empty();
     this.collection.forEach(this.renderMovie, this);
   },
 
-  renderMovie: function(movie) {
-    var movieView = new MovieView({model: movie});
+  renderMovie: function (movie) {
+    var movieView = new MovieView({ model: movie });
     this.$el.append(movieView.render());
   }
 
